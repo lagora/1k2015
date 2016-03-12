@@ -1,9 +1,15 @@
 <!DOCTYPE>
 <html>
   <head>
-    <script type="text/javascript" src="1k.js"></script>
   </head>
-  <body style="background-color:#000000;margin:0;" onload="start();">
-    <canvas id="canvas" width="360" height="360" style="border: 1px solid #222222;"></canvas>
+  <body style="background-color:#000000;margin:0;">
+    <canvas width="180" height="180" style="border: 1px solid #222222;margin:auto;display:block;"></canvas>
+    <script type="text/javascript">
+      window.d = document;
+      window.a = document.querySelector('canvas');
+      window.b = document.querySelector('body');
+      window.c = window.a.getContext('2d');
+    </script>
+    <script type="text/javascript" src="1k.min.js"></script>
   </body>
 </html>
