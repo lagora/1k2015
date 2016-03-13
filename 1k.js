@@ -30,7 +30,7 @@
     ctx.clearRect(0,0,w,h);
     ctx.fillText('LVL ' + Math.round(1+lvl*2) + ' SCORE ' + score,u, u);
     if (gameover) {
-      ctx.fillText('GAMEOVER', w/3,h/2)
+      ctx.fillText('GAM OVR', w/3,h/2)
     } else {
       var ennemiesFelt;
       for (i = 0; i < l; i+=EntityOffset) {
@@ -39,15 +39,16 @@
         rects[i+1] += 0 == i ? 0:o ? -1*(h*(r()+1)):rects[i+4]+(playerSpeed/2*lvl)+playerSpeed;
         if (0 == i % EntityOffset) ennemiesFelt += o && !s ? 1:0;
         score += !s && o ? 1:0;
-        gameover = s && (rects[0] > rects[i] && rects[0] < rects[i]+rects[i+2]) && (rects[1] < rects[i+1]);
-        ctx.fillStyle = "rgba(255, 255, 255, "+rects[i+4]+")";
+        gameover = s && (rects[0] > rects[i]-u && rects[0]+u < rects[i]) && (rects[1] < rects[i+1]);
+        ctx.fillStyle = "rgba(255,255,255,"+rects[i+4]+")";
         ctx.fillRect(rects[i],rects[i+1],rects[i+2],4 * (playerSpeed + .5));
       }
       var lvlUp = ennemiesFelt > l/EntityOffset;
       lvl += lvlUp && lvl < u ? .2:0;
       ennemiesFelt = lvlUp ? 0:ennemiesFelt;
-      if (goLeft) rects[0] -= playerSpeed*(9 > lvl ? lvl:9)+1;
-      if (goRight) rects[0] += playerSpeed*(9 > lvl ? lvl:9)+1;
+      var v = playerSpeed*(9 > lvl ? lvl:9)+1;
+      if (goLeft) rects[0] -= v;
+      if (goRight) rects[0] += v;
     }
     requestAnimationFrame(render);
   }
