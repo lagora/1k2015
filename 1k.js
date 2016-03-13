@@ -1,93 +1,65 @@
 (function () {
-  // var canvas = window.a;
   ctx = window.c;
-  ctx.font = "8px Arial";
+  ctx.font = "8px";
   var u=8,
   f=255,
-  g=0.5,
-  k=0.75,
-  X=0,Y=1,W=2,H=3,R=4,G=5,B=6,A=7,S=8,
+  gameover=0,
   w = window.a.width,
   h = window.a.height,
   playerSpeed = 1,
-  goLeft = false,
-  goRight = false,
-  centerX = Math.round(w / 2),
-  centerY = Math.round(h / 2),
-  ennemiesFelt=0,
+  goLeft = 0,
+  goRight = 0,
   score=0,
-  level=9,
-  EntityOffset = 9,
-  minEntities = Math.ceil(w/2),
-  maxEnnemies = 100,
-  rects = [
-    centerX, h - u*2,//position
-    u, u,//size
-    f, f, 0, 1,//color
-    1//speed
-  ];
-  function out() {
-    return -1*(h*(Math.random()+1));
-  }
-  for (var i = 1; i < minEntities; i++) {
+  lvl=0,
+  EntityOffset = 5,
+  minEntities = w*8,
+  rects = [];
+  function r() {return Math.random();};
+  for (var i = 0; i < minEntities+99; i+=EntityOffset) {
+    s = 0 != i && i < minEntities, d = r();
     rects = rects.concat([
-      Math.random()*w, Math.random()*h,
-      1, 1,
-      f,f,f,g*Math.random(),
-      Math.random()+g
+      r()*w, (h*(r()+1)),
+      s?1:u, s?d:u,
+      s?1-d:1
     ]);
   }
-  for (var i = minEntities; i < minEntities+maxEnnemies; i+=EntityOffset) {
-    rects = rects.concat([
-      Math.random()*(w - u), out(),
-      u * k, u * k,
-      f,0,0,1,
-      1
-    ]);
-  }
+  rects[0] = w/2;
+  rects[1] = h-u*2;
   l = rects.length;
-  function rect(x,y,w,h,r,g,b,a) {
-    ctx.fillStyle = "rgba("+[r, g, b, a].join(',')+")";
-    ctx.fillRect(x, y, w, h);
-  };
-  function star(i) {
-    return i > EntityOffset && i < EntityOffset * minEntities;
-  }
-  function update() {
-    for (var i = EntityOffset; i < l; i+=EntityOffset) {
-      var _out = h < rects[i+Y], s = i > minEntities*EntityOffset, odd = g < Math.random();
-      rects[i+X] = rects[i] < 0 ? 0:rects[i] > w ? w:rects[i+X];
-      rects[i+X] += s ? Math.random()*level*(odd ? -1:1):0;
-      rects[i+Y] += rects[i+S] * playerSpeed;
-      rects[i+H] = 4 * (playerSpeed + g/g);
-      rects[i+Y] += _out ? out():(playerSpeed/2*level)+playerSpeed;
-        if (s && 0 === i%EntityOffset) ennemiesFelt += _out && s ? 1:0;
-    }
-    var levelUp = ennemiesFelt > l/EntityOffset;
-    level += levelUp && level < u ? 0.2:0;
-    score += Math.round(ennemiesFelt * (level+1));
-    ennemiesFelt = levelUp ? 0:ennemiesFelt;
-    if (goLeft) rects[0] -= playerSpeed*level+1;
-    if (goRight) rects[0] += playerSpeed*level+1;
-  };
   function render(callback) {
     ctx.clearRect(0,0,w,h);
-    update();
-    ctx.fillText('LEVEL ' + Math.round(level) + ' SCORE ' + score,u, h);
-    for (var i = 0; i < l; i+=EntityOffset) {
-      rect(rects[i],rects[i+1],rects[i+2],rects[i+3],rects[i+4],rects[i+5],rects[i+6],rects[i+7]);
+    ctx.fillText('LVL ' + Math.round(1+lvl*2) + ' SCORE ' + score,u, u);
+    if (gameover) {
+      ctx.fillText('GAMEOVER', w/3,h/2)
+    } else {
+      var ennemiesFelt;
+      for (i = 0; i < l; i+=EntityOffset) {
+        o = h < rects[i+1], s = i < minEntities, odd = .5 < r();
+        rects[i] += s ? r()*lvl*(r() ? -2:2):0;
+        rects[i+1] += 0 == i ? 0:o ? -1*(h*(r()+1)):rects[i+4]+(playerSpeed/2*lvl)+playerSpeed;
+        if (0 == i % EntityOffset) ennemiesFelt += o && !s ? 1:0;
+        score += !s && o ? 1:0;
+        gameover = s && (rects[0] > rects[i] && rects[0] < rects[i]+rects[i+2]) && (rects[1] < rects[i+1]);
+        ctx.fillStyle = "rgba(255, 255, 255, "+rects[i+4]+")";
+        ctx.fillRect(rects[i],rects[i+1],rects[i+2],4 * (playerSpeed + .5));
+      }
+      var lvlUp = ennemiesFelt > l/EntityOffset;
+      lvl += lvlUp && lvl < u ? .2:0;
+      ennemiesFelt = lvlUp ? 0:ennemiesFelt;
+      if (goLeft) rects[0] -= playerSpeed*(9 > lvl ? lvl:9)+1;
+      if (goRight) rects[0] += playerSpeed*(9 > lvl ? lvl:9)+1;
     }
     requestAnimationFrame(render);
   }
   window.b.addEventListener('keyup', function() {
-    goLeft = goRight = false;
+    goLeft = goRight = 0;
     playerSpeed = 1;
   });
   window.b.addEventListener('keydown', function(e) {
-    ek = e.keyCode
-    goLeft = 37 == ek && (rects[0]) > 0
+    ek = e.keyCode;
+    goLeft = 37 == ek && (rects[0]) > 0;
     goRight = 39 == ek && (rects[0] + rects[2]) < w;
-    playerSpeed = 38 === ek ? 2:40 === ek ? g:1;
+    playerSpeed = 38 == ek ? 3:1.5;
   });
   render();
 }())
